@@ -10,8 +10,13 @@ import requests
 
 logger = logging.getLogger(__name__)
 
+
 class ReCaptchaField(forms.CharField):
     def __init__(self, attrs={}, *args, **kwargs):
+        if 'secret_key' in kwargs:
+            self.secret = kwargs.pop('secret_key')
+        else:
+            self.secret = settings.RECAPTCHA_PRIVATE_KEY
         super(ReCaptchaField, self).__init__(*args, **kwargs)
 
     def clean(self, values):
@@ -27,7 +32,7 @@ class ReCaptchaField(forms.CharField):
             r = requests.post(
                 'https://www.google.com/recaptcha/api/siteverify',
                 {
-                    'secret': settings.RECAPTCHA_PRIVATE_KEY,
+                    'secret': self.secret,
                     'response': response_token
                 },
                 timeout=5

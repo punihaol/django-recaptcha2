@@ -3,9 +3,14 @@ from django.forms.widgets import Widget
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 
+
 class ReCaptchaWidget(Widget):
     def __init__(self, explicit=False, theme=None, type=None, size=None, tabindex=None, callback=None,
                  expired_callback=None, attrs={}, *args, **kwargs):
+        if 'site_key' in kwargs:
+            self.site_key = kwargs.pop('site_key')
+        else:
+            self.site_key = settings.RECAPTCHA_PUBLIC_KEY
         super(ReCaptchaWidget, self).__init__(*args, **kwargs)
         self.explicit = explicit
         self.theme = theme
@@ -23,7 +28,7 @@ class ReCaptchaWidget(Widget):
         return mark_safe(
             render_to_string(template, {
                 'container_id': 'id_%s' % name,
-                'public_key': settings.RECAPTCHA_PUBLIC_KEY,
+                'site_key': self.site_key,
                 'theme': self.theme,
                 'type': self.type,
                 'size': self.size,
